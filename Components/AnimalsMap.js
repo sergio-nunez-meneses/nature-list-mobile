@@ -38,7 +38,9 @@ export default class AnimalsMap extends React.Component {
       longitudeDelta: 0.0421,
     },
     ready: false,
-    currentPosition: []
+    currentPosition: [],
+    latitude: 46.987471,
+    longitude: 3.150616,
   };
 
   setRegion(region) {
@@ -52,6 +54,12 @@ export default class AnimalsMap extends React.Component {
 
   componentDidMount() {
     this.getCurrentPosition();
+    this.trackPosition();
+  }
+
+  componentDidUpdate() {
+    navigator.geolocation.clearWatch(this.watchId);
+    this.trackPosition();
   }
 
   getCurrentPosition() {
@@ -97,6 +105,26 @@ export default class AnimalsMap extends React.Component {
     }
   };
 
+  trackPosition() {
+    this.watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        if (geolib.isValidCoordinate(position.coords)) {
+          const { latitude, longitude } = position.coords;
+          var distance = geolib.getDistance(position.coords, {
+              latitude: 46.987721,
+              longitude: 3.161632,
+          });
+
+          console.log(`You are ${distance} meters away from 47.001512, 3.134294`);
+
+          this.setState({ latitude, longitude });
+        }
+      },
+      (error) => console.log(error),
+      { enableHighAccuracy: false, timeout: 0, maximumAge: 0, distanceFilter: 0 }
+    );
+  }
+
   onMapReady = (e) => {
     if (!this.state.ready) {
       this.setState({ ready: true });
@@ -105,7 +133,7 @@ export default class AnimalsMap extends React.Component {
 
   render() {
     const { navigation } = this.props;
-    const { region } = this.state;
+    const { region, latitude, longitude } = this.state;
 
     return (
       <React.Fragment>
