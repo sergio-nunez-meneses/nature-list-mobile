@@ -27,11 +27,11 @@ export default class Home extends React.Component {
             borderRadius: 5,
             marginBottom: 10,
             width: '80%',
-            backgroundColor: '#52AD9C',
+            backgroundColor: '#6CC551',
           }}
-          onPress={() => { navigation.navigate('TestPage'); }}
+          onPress={() => { navigation.navigate('AnimalsMap'); }}
         >
-          <Text style={styles.TextStyle}> Go to test page </Text>
+          <Text style={styles.TextStyle}> Animals' map! </Text>
         </TouchableOpacity>
 
       </View>

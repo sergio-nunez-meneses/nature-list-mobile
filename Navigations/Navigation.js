@@ -2,7 +2,7 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Home from '../Components/Home';
-import TestPage from '../Components/TestPage';
+import AnimalsMap from '../Components/AnimalsMap';
 
 export default class Navigation extends React.Component {
   Stack = createStackNavigator();
@@ -30,18 +30,17 @@ export default class Navigation extends React.Component {
           />
 
           <this.Stack.Screen
-            name="TestPage"
-            component={TestPage}
+            name="AnimalsMap"
+            component={AnimalsMap}
             options={{
-              title: 'Test',
+              title: 'Animals Location',
               headerStyle: {
-                elevation: 0,
                 backgroundColor: '#447604',
+                elevation: 0,
               },
               headerTintColor: '#fff',
               headerTitleStyle: {
                 fontWeight: 'bold',
-                textAlign: 'center',
               },
             }}
           />
