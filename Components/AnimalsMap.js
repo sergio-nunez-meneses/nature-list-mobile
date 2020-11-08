@@ -166,7 +166,6 @@ export default class AnimalsMap extends React.Component {
         }
       );
       Alert.alert('', `Vous êtes actuellement à ${dis} mettres (${Math.floor(dis / 1000)} KM)`);
-      // console.log(`Vous êtes actuellement à ${dis} mettres (${dis / 1000} KM)`);
     } catch (error) {
       console.error(error);
     }
