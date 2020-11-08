@@ -16,6 +16,7 @@ import {
   getDistance,
   getPreciseDistance
 } from 'geolib';
+import { fetchAnimals } from '../API/fetch';
 
 const LATITUDE_DELTA = 0.01;
 const LONGITUDE_DELTA = 0.01;
@@ -32,8 +33,8 @@ export default class AnimalsMap extends React.Component {
 
   state = {
     region: {
-      latitude: 46.987471,
-      longitude: 3.150616,
+      latitude: 46.2276,
+      longitude: 2.2137,
       latitudeDelta: 0.0922,
       longitudeDelta: 0.0421,
     },
@@ -41,6 +42,30 @@ export default class AnimalsMap extends React.Component {
     currentPosition: [],
     latitude: 46.987471,
     longitude: 3.150616,
+    data: [],
+    selectedAnimal: ''
+  };
+
+  getAnimals = async() => {
+    const animals = await fetchAnimals('amphibians', 1);
+    this.setState({ data: animals });
+  }
+
+  componentDidMount() {
+    this.getAnimals();
+    this.getCurrentPosition();
+    this.trackPosition();
+  };
+
+  componentDidUpdate() {
+    navigator.geolocation.clearWatch(this.watchId);
+    this.trackPosition();
+  };
+
+  onMapReady = (e) => {
+    if (!this.state.ready) {
+      this.setState({ ready: true });
+    }
   };
 
   setRegion(region) {
@@ -50,17 +75,27 @@ export default class AnimalsMap extends React.Component {
       }, 10)
     }
     this.setState({ region });
-  }
+  };
 
-  componentDidMount() {
-    this.getCurrentPosition();
-    this.trackPosition();
-  }
-
-  componentDidUpdate() {
-    navigator.geolocation.clearWatch(this.watchId);
-    this.trackPosition();
-  }
+  animalsMarkers() {
+    return this.state.data.map(
+      (data) =>
+      <Marker
+        key={data.latitude}
+        coordinate={{
+          latitude: data.latitude,
+          longitude: data.longitude
+        }}
+        title={data.name}
+        description={`${data.latin_name}, ${data.specie}`}
+        // image={require('../assets/name.extension')}
+        onPress= {() => {
+          this.calculateDistance(data.id, data.latitude, data.longitude);
+        }}
+      >
+      </Marker>
+    )
+  };
 
   getCurrentPosition() {
     try {
@@ -114,44 +149,53 @@ export default class AnimalsMap extends React.Component {
               latitude: 46.987721,
               longitude: 3.161632,
           });
-
-          console.log(`You are ${distance} meters away from 47.001512, 3.134294`);
-
           this.setState({ latitude, longitude });
         }
       },
       (error) => console.log(error),
       { enableHighAccuracy: false, timeout: 0, maximumAge: 0, distanceFilter: 0 }
     );
-  }
+  };
 
-  onMapReady = (e) => {
-    if (!this.state.ready) {
-      this.setState({ ready: true });
+  calculateDistance = async(id, latitude, longitude) => {
+    try {
+      let dis = geolib.getDistance(this.state.currentPosition,
+        {
+          latitude: latitude,
+          longitude: longitude,
+        }
+      );
+      Alert.alert('', `Vous êtes actuellement à ${dis} mettres (${Math.floor(dis / 1000)} KM)`);
+      // console.log(`Vous êtes actuellement à ${dis} mettres (${dis / 1000} KM)`);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   render() {
-    const { navigation } = this.props;
+    const { navigation, children, renderMarker, markers } = this.props;
     const { region, latitude, longitude } = this.state;
 
     return (
       <React.Fragment>
         <View style={{flex: 5}}>
           <MapView
-            showsPointsOfInterest={true}
             provider="google"
-            initialRegion={this.state.region}
-            showsUserLocation
             ref={ map => { this.map = map }}
             onMapReady={this.onMapReady}
+            initialRegion={this.state.region}
+            showsUserLocation={true}
+            followsUserLocation={true}
             showsMyLocationButton={true}
+            showsPointsOfInterest={true}
             style={StyleSheet.absoluteFill}
             textStyle={{ color: '#bc8b00' }}
             containerStyle={{
               backgroundColor: '#6CC551',
               borderColor: '#BC8B00'
             }}>
+            {this.animalsMarkers()}
+            {children && children || null}
           </MapView>
         </View>
         <View style={styles.TouchableOpacityContainer}>
